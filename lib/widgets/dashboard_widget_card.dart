@@ -111,6 +111,22 @@ class DashboardWidgetCard extends ConsumerWidget {
   }
 }
 
+/// Y-axis labels on one line, skipping the min/max edge labels fl_chart forces in
+/// (e.g. "1.345K"), which don't fit and wrap up into the card title.
+final _leftAxis = AxisTitles(
+  sideTitles: SideTitles(
+    showTitles: true,
+    reservedSize: 40,
+    getTitlesWidget: (v, meta) => meta.min == v || meta.max == v
+        ? const SizedBox.shrink()
+        : SideTitleWidget(
+            meta: meta,
+            child: Text(meta.formattedValue,
+                maxLines: 1, softWrap: false, overflow: TextOverflow.fade, style: const TextStyle(fontSize: 10, color: AppColors.grey500)),
+          ),
+  ),
+);
+
 class _Hint extends StatelessWidget {
   const _Hint(this.text, {this.error = false});
   final String text;
@@ -216,6 +232,7 @@ class WidgetVisual extends StatelessWidget {
     if (data.isEmpty) return _Hint('No ${fieldLabel(field)} readings.');
     final t0 = data.expand((s) => s.$2).map((p) => p.$1.millisecondsSinceEpoch).reduce(min).toDouble();
     return Column(children: [
+      const SizedBox(height: 8),
       Expanded(
         child: LineChart(LineChartData(
           gridData: const FlGridData(drawVerticalLine: false),
@@ -223,7 +240,7 @@ class WidgetVisual extends StatelessWidget {
           titlesData: FlTitlesData(
             topTitles: const AxisTitles(),
             rightTitles: const AxisTitles(),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+            leftTitles: _leftAxis,
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -275,7 +292,7 @@ class WidgetVisual extends StatelessWidget {
           titlesData: FlTitlesData(
             topTitles: const AxisTitles(),
             rightTitles: const AxisTitles(),
-            leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+            leftTitles: _leftAxis,
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
